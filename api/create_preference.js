@@ -1,20 +1,13 @@
-const express = require("express");
-const cors = require("cors");
 const { MercadoPagoConfig, Preference } = require("mercadopago");
-require("dotenv").config();
-
-const app = express();
-
-app.use(cors());
-app.use(express.json());
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_TOKEN,
+  accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN,
 });
 
-app.post("/create_preference", async (req, res) => {
-  console.log("Recebi uma requisição!");
-  console.log(req.body);
+module.exports = async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Método não permitido" });
+  }
 
   try {
     const preference = new Preference(client);
@@ -35,12 +28,12 @@ app.post("/create_preference", async (req, res) => {
     res.json({
       init_point: result.init_point,
     });
+
   } catch (error) {
-    console.error("Erro criando pagamento:");
     console.error(error);
 
     res.status(500).json({
       error: "Erro criando pagamento",
     });
   }
-});
+};
