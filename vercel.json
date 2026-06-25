@@ -1,14 +1,9 @@
 {
   "version": 2,
-  "functions": {
-    "api/*.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/create_preference",
-      "dest": "/api/create_preference.js"
+      "source": "/create_preference",
+      "destination": "/api/create_preference.js"
     }
   ]
 }
