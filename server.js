@@ -3,6 +3,15 @@ const cors = require("cors");
 const { MercadoPagoConfig, Preference } = require("mercadopago");
 require("dotenv").config();
 
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { createClient } = require("@supabase/supabase-js");
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE
+);
+
 const app = express();
 
 app.use(cors());
@@ -43,6 +52,64 @@ app.post("/create_preference", async (req, res) => {
       error: "Erro criando pagamento",
     });
   }
+});
+// Cadastro de usuário
+app.post("/register", async (req, res) => {
+  try {
+    const { nome, email, senha } = req.body;
+
+    if (!nome || !email || !senha) {
+      return res.status(400).json({
+        message: "Preencha todos os campos.",
+      });
+    }
+
+    // Verifica se já existe
+    const { data: usuarioExistente } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (usuarioExistente) {
+      return res.status(400).json({
+        message: "Este e-mail já está cadastrado.",
+      });
+    }
+
+    // Criptografa a senha
+    const senhaCriptografada = await bcrypt.hash(senha, 10);
+
+    // Salva no banco
+    const { error } = await supabase.from("usuarios").insert([
+      {
+        nome,
+        email,
+        senha: senhaCriptografada,
+      },
+    ]);
+
+    if (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Erro ao cadastrar usuário.",
+      });
+    }
+
+    res.status(201).json({
+      message: "Usuário cadastrado com sucesso!",
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Erro interno do servidor.",
+    });
+  }
+});
+app.get("/", (req, res) => {
+  res.send("Backend atualizado funcionando!");
 });
 const PORT = process.env.PORT || 3000;
 
