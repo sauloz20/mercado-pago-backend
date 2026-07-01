@@ -5,6 +5,8 @@ require("dotenv").config();
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+console.log("SUPABASE_URL =", process.env.SUPABASE_URL);
+console.log("SUPABASE_SERVICE_ROLE =", process.env.SUPABASE_SERVICE_ROLE ? "OK" : "UNDEFINED");
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
